@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/DrivetDevelopment/database#readme",
   "dependencies": {
+    "config": "^3.3.6",
+    "js-yaml": "^4.1.0",
     "mysql": "^2.18.1"
   }
 }
