@@ -36,7 +36,7 @@ const rowQuery = (sql, func) => {
           return reject(new Error(error));
         }
 
-        resolve(Object.values(JSON.parse(JSON.stringify(results))));
+        resolve(Object.values(JSON.parse(JSON.stringify(results)))[0]);
     });
   });
 }
