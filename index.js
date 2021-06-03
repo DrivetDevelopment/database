@@ -8,10 +8,7 @@ const connection = mysql.createConnection({
 });
 
 connection.connect((err) => {
-  if (err) {
-    return console.error('error: ' + err.message);
-  }
-
+  if (err) return console.error('error connecting to mysql: ' + err.stack);
   console.log('Connected to the MySQL server.');
 });
 
@@ -41,6 +38,19 @@ const rowQuery = (sql, func) => {
   });
 }
 
+const rowsQuery = (sql, func) => {
+  return new Promise((resolve, reject) => {
+    connection.query(sql, func, function(error, results, fields) {
+        if (error) {
+          console.error(error.sqlMessage);
+          return reject(new Error(error));
+        }
+
+        resolve(Object.values(JSON.parse(JSON.stringify(results))));
+    });
+  });
+}
+
 const showRows = (rows) => {
   console.error('showRows: DEPRECATED: Use rowQuery instead')
 
@@ -55,4 +65,4 @@ const ping = async () => {
   return connection.state ? true : false
 }
 
-module.exports = { query, showRows, ping, rowQuery };
+module.exports = { query, showRows, ping, rowQuery, rowsQuery };
