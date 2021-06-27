@@ -1,7 +1,7 @@
 {
-  "name": "database",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@drivet/database",
+  "version": "0.1.7",
+  "description": "The main repository for Drivet's database",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,8 +10,12 @@
     "type": "git",
     "url": "git+https://github.com/DrivetDevelopment/database.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "database",
+    "drivet",
+    "mysql"
+  ],
+  "author": "GhostSlayer",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/DrivetDevelopment/database/issues"

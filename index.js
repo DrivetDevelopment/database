@@ -1,10 +1,11 @@
 const mysql = require('mysql');
 const config = require('config').util.toObject();
 const connection = mysql.createConnection({
-  host     : config.databases.mysql.host,
-  user     : config.databases.mysql.user,
-  password : config.databases.mysql.password,
-  database : config.databases.mysql.database,
+    host     : config.databases.mysql.host,
+    user     : config.databases.mysql.user,
+    password : config.databases.mysql.password,
+    database : config.databases.mysql.database,
+    charset  : 'utf8mb4_unicode_ci'
 });
 
 connection.connect((err) => {
