@@ -1,6 +1,6 @@
 {
   "name": "@drivet/database",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "The main repository for Drivet's database",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/DrivetDevelopment/database#readme",
   "dependencies": {
+    "cat-loggr": "^1.2.2",
     "config": "^3.3.6",
+    "eventemitter3": "^4.0.7",
     "js-yaml": "^4.1.0",
     "mysql": "^2.18.1"
   }

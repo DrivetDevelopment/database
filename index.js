@@ -1,69 +1,127 @@
 const mysql = require('mysql');
 const config = require('config').util.toObject();
-const connection = mysql.createConnection({
-    host     : config.databases.mysql.host,
-    user     : config.databases.mysql.user,
-    password : config.databases.mysql.password,
-    database : config.databases.mysql.database,
-    charset  : 'utf8mb4_unicode_ci'
-});
+const CatLoggr = require('cat-loggr');
+const console = new CatLoggr();
 
-connection.connect((err) => {
-  if (err) return console.error('error connecting to mysql: ' + err.stack);
-  console.log('Connected to the MySQL server.');
-});
+const { EventEmitter } = require('eventemitter3');
 
-const query = (sql, func) => {
-  return new Promise((resolve, reject) => {
-    connection.query(sql, func, function(error, results, fields) {
+/**
+ * The MySQL database handler
+ */
+module.exports = class Database extends EventEmitter {
+  constructor(client) {
+    super();
+    this.client = client;
+    this.reconnectAfterClose = true;
+    console.log('MySQL initialized');
+  }
+
+  /**
+   * Creates a client and connects to the database
+   * @param {Object} options
+   */
+  connect({ host = "localhost", user, password, database, port = "3306" }) {
+    return new Promise((resolve, reject) => {
+      this.mysql = mysql.createConnection({ 
+        host: host, 
+        user: user, 
+        password: password, 
+        database: database, 
+        port: port,
+        charset: 'utf8mb4_unicode_ci'
+      });
+
+      this.mysql.on('error', this.onError.bind(this));
+      this.mysql.on('warning', w => console.warn('MySQL Warning', w));
+      this.mysql.on('end', () => this.onClose.bind(this));
+      this.mysql.on('reconnecting', () => console.warn('Reconnecting to MySQL...'));
+      this.mysql.on('ready', () => console.info('MySQL client ready.'));
+      this.mysql.on('connect', () => console.info('MySQL connection has started.'));
+
+      this.host = host;
+      this.user = user;
+      this.password = password;
+      this.database = database;
+      this.port = port;
+
+      this.mysql.connect()
+    });
+  }
+
+  query(sql, func) {
+    return new Promise((resolve, reject) => {
+      this.mysql.query(sql, func, function(error, results, fields) {
         if (error) {
           console.error(error.sqlMessage);
           return reject(new Error(error));
         }
 
         resolve(results);
+      });
     });
-  });
-}
+  }
 
-const rowQuery = (sql, func) => {
-  return new Promise((resolve, reject) => {
-    connection.query(sql, func, function(error, results, fields) {
+  rowQuery(sql, func) {
+    return new Promise((resolve, reject) => {
+      this.mysql.query(sql, func, function(error, results, fields) {
         if (error) {
           console.error(error.sqlMessage);
           return reject(new Error(error));
         }
 
         resolve(Object.values(JSON.parse(JSON.stringify(results)))[0]);
+      });
     });
-  });
-}
+  }
 
-const rowsQuery = (sql, func) => {
-  return new Promise((resolve, reject) => {
-    connection.query(sql, func, function(error, results, fields) {
+  rowsQuery(sql, func) {
+    return new Promise((resolve, reject) => {
+      this.mysql.query(sql, func, function(error, results, fields) {
         if (error) {
           console.error(error.sqlMessage);
           return reject(new Error(error));
         }
 
         resolve(Object.values(JSON.parse(JSON.stringify(results))));
+      });
     });
-  });
-}
-
-const showRows = (rows) => {
-  console.error('showRows: DEPRECATED: Use rowQuery instead')
-
-  if (rows) {
-    return Object.values(JSON.parse(JSON.stringify(rows)))
-  } else {
-    throw new Error('No rows found')
   }
-}
 
-const ping = async () => {
-  return connection.state ? true : false
-}
+  // #endregion
 
-module.exports = { query, showRows, ping, rowQuery, rowsQuery };
+  /**
+   * Reconnects the client
+   */
+  async reconnect() {
+    console.warn('Attempting MySQL reconnection');
+    this.conn = await this.connect(this);
+  }
+
+  /**
+   * Disconnects the client
+   */
+  disconnect() {
+    this.reconnectAfterClose = false;
+    return new Promise(resolve => {
+      this.mysql.once('end', resolve);
+      this.mysql.end();
+    });
+  }
+
+  /**
+   * @private
+   */
+  onError(err) {
+    console.error('MySQL Error', err);
+    this.emit('error', err);
+  }
+
+  /**
+   * @private
+   */
+  async onClose() {
+    console.error('MySQL closed');
+    this.emit('close');
+    if (this.reconnectAfterClose) await this.reconnect();
+  }
+};

@@ -1,19 +1,33 @@
-# drivet.js
-Using [Drivet's](https://drivet.xyz) API made easy
-[![Package Version](https://badgen.net/npm/v/@drivet/database)](https://npmjs.com/package/@drivet/database) [![TypeScript](https://badgen.net/npm/types/drivet.js)](https://npmjs.com/package/@drivet/database)
 
+# Drivet Database
+
+[![npm](https://img.shields.io/npm/v/@drivet/database.svg)](https://www.npmjs.com/package/@drivet/database)
+
+A simple database mainly for personal use. Uses [cat-loggr](https://www.npmjs.com/package/cat-loggr) as the main logger.
 
 ## Install
 
-### NPM
+#### NPM
 ```
 npm install @drivet/database
 ```
 
-### [Yarn](https://npmjs.com/package/yarn)
+#### [Yarn](https://npmjs.com/package/yarn)
+
 ```
 yarn add @drivet/database
 ```
 
-## Support
-Join our [Discord Server](https://discord.drivet.xyz) to get support with this package.
+## Connecting to the database
+
+```js
+const mysql = require('@drivet/database');
+const client = new mysql();
+
+client.connect({ 
+  host: 'localhost',
+  user: 'me',
+  password: 'secret',
+  database: 'my_db',
+});
+```
